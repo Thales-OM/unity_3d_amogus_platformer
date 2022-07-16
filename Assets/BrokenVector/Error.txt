@@ -1,0 +1,1 @@
+Assets\BrokenVector\PersistentComponents\Editor\PersistentComponents.cs(28,13): warning CS0618: 'EditorApplication.playmodeStateChanged' is obsolete: 'Use EditorApplication.playModeStateChanged and/or EditorApplication.pauseStateChanged'
