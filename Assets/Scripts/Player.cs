@@ -1,69 +1,107 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    private bool impostor;
-    private bool onGround;
     public Camera cam_side;
     public Camera cam_fpv;
     public float _moveSpeed;
     public float _jumpHeight;
     private Animator animator;
-    //private List <GameObject> currentCollisions = new List <GameObject> ();
+    private bool impostor;
+    private bool onGround;
+    private bool isWalking;
     private int floor_counter;
-    void Start()
+    //private List <GameObject> currentCollisions = new List <GameObject> ();
+    private Rigidbody Main_Rigidbody;
+    private PlayerInput playerInput;
+    private PlayerInputActions playerInputActions;
+
+    private void Start()
     {
         animator = GetComponent<Animator>();
         animator.SetBool("isWalking", false);
         animator.SetBool("onGround", false);
         onGround = false;
+        isWalking = false;
         floor_counter = 0;
+        Main_Rigidbody = GetComponent<Rigidbody>();
+        
+        playerInput = GetComponent<PlayerInput>();
+        playerInputActions = new PlayerInputActions();
+        playerInputActions.Playerside.Enable();
+        playerInputActions.Playerside.Jump.performed += Jump; // может сделать .started
+        //playerInputActions.Playerside.Movement.canceled += Movement_End;
+
     }
     
-     void Update()
+    private void Change_Camera(Camera main_camera)
     {
-        animator.SetBool("isWalking", false); // стоит улучшить механизм определения с помощью нажатия/отжатия клавиш 
-        animator.SetBool("onGround", onGround);
-
-        if (Input.GetKey(KeyCode.D) & Camera.main == cam_side)
+        if (main_camera == cam_side)
         {
-            animator.SetBool("isWalking", true);
-            transform.position += Time.deltaTime * _moveSpeed * Vector3.right; //движение будет привязано к частоте кадров
-        } 
-
-        if (Input.GetKey(KeyCode.A) & Camera.main == cam_side)
-        {   
-            animator.SetBool("isWalking", true);
-            transform.position += Time.deltaTime * _moveSpeed * Vector3.left;
-        } 
-
-        if (Input.GetKey(KeyCode.W) & Camera.main == cam_fpv)
+            playerInputActions.Playerside.Enable();
+        }
+        else if (main_camera == cam_fpv)
         {
-            animator.SetBool("isWalking", true);
-            transform.position += Time.deltaTime * _moveSpeed * Vector3.right; //движение будет привязано к частоте кадров
-        } 
+            playerInputActions.PlayerFPV.Enable();
+        }
+    }
 
-        if (Input.GetKey(KeyCode.S) & Camera.main == cam_fpv)
-        {   
-            animator.SetBool("isWalking", true);
-            transform.position += Time.deltaTime * _moveSpeed * Vector3.left;
-        } 
-
-        if (Input.GetKeyDown(KeyCode.Space))
+    private bool Walk(Vector2 inputVector)
+    {
+        inputVector.Normalize();
+        if (inputVector.x !=  0 | inputVector.y !=  0) // стоит ли использовать .Equals() ?
         {
-            Debug.Log("Space");
-            if (onGround)
-            {
-                GetComponent<Rigidbody>().AddForce(Vector3.up * _jumpHeight, ForceMode.VelocityChange);
-            }
+            Debug.Log(inputVector);
+            transform.position += Time.deltaTime * _moveSpeed * new Vector3(inputVector.y, 0, -inputVector.x); //движение будет привязано к частоте кадров
+            return true;
+        }
+        else
+        {
+            return false;
+        } 
         
+    }
+    private void Movement_Input(Camera main_camera)
+    {
+        Vector2 inputVector = new Vector2(0, 0);
+        if (main_camera == cam_side)
+        {
+            inputVector = playerInputActions.Playerside.Movement.ReadValue<Vector2>(); // возвращает нормализованный вектор
+        }
+        else if (main_camera == cam_fpv)
+        {
+            inputVector = playerInputActions.PlayerFPV.Movement.ReadValue<Vector2>();
         }
 
+        isWalking = Walk(inputVector); // потом придется переделать если добавлю бег
+    }
+
+    private void Movement_End(InputAction.CallbackContext context)
+    {
+        isWalking = false;
+    }
+
+    private void Jump(InputAction.CallbackContext context)
+    {
+        if (onGround)
+        {
+            Debug.Log("Jump"+context.phase);
+            Main_Rigidbody.AddForce(Vector3.up * _jumpHeight, ForceMode.VelocityChange);
+        }
+    }
+    private void Update()
+    {
+        Change_Camera(Camera.main);
+        isWalking = false;
+        Movement_Input(Camera.main); // стоит поменять на current
+        animator.SetBool("isWalking", isWalking); 
+        animator.SetBool("onGround", onGround);
     }    
      
-    void OnCollisionEnter (Collision collision) 
+    private void OnCollisionEnter (Collision collision) // дискретно работает, может багануть
     {
         if (collision.gameObject.tag == "Floor")
         {
@@ -78,7 +116,7 @@ public class Player : MonoBehaviour
         }
     }
  
-     void OnCollisionExit (Collision collision)
+    private void OnCollisionExit (Collision collision)
      {
         if (collision.gameObject.tag == "Floor")
         {
