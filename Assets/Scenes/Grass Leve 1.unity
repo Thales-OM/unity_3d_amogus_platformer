@@ -157,10 +157,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8e71bbe74a2ebc4c959438551d34118, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  min_x_rot: -45
+  max_x_rot: 45
   cam_side: {fileID: 963194227}
   cam_fpv: {fileID: 1305228751}
-  Main_Body: {fileID: 325838079}
-  Hands: {fileID: 50494948}
+  player: {fileID: 1733214759}
 --- !u!4 &239554267
 Transform:
   m_ObjectHideFlags: 0
@@ -819,6 +820,17 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1733214746}
   m_Enabled: 1
+--- !u!114 &1733214759 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+  m_PrefabInstance: {fileID: 1130379537263552570}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733214746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95bf1e7ba9c9ac04a9bfc5ec383a0fc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1130379537263552570
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -839,6 +851,10 @@ PrefabInstance:
       value: 2.03
       objectReference: {fileID: 0}
     - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: Hands
+      value: 
+      objectReference: {fileID: 50494948}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
       propertyPath: cam_fpv
       value: 
       objectReference: {fileID: 1305228751}
@@ -846,6 +862,50 @@ PrefabInstance:
       propertyPath: cam_side
       value: 
       objectReference: {fileID: 963194227}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: Main_Body
+      value: 
+      objectReference: {fileID: 325838079}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: max_y_rot
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: max_z_rot
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: min_y_rot
+      value: -45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: min_z_rot
+      value: -45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_controller
+      value: 
+      objectReference: {fileID: 239554266}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_sensitivity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_sensitivity_x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_sensitivity_y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_sensitivity_z
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 1130379538241084916, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
       propertyPath: m_Enabled
       value: 0

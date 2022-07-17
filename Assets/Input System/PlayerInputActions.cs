@@ -82,6 +82,24 @@ namespace UnityEngine.InputSystem
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Camera_Z"",
+                    ""type"": ""Value"",
+                    ""id"": ""3d7cf515-e13e-425c-b484-88278257961e"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Camera_X"",
+                    ""type"": ""Value"",
+                    ""id"": ""cb199f7e-ae07-446d-920d-2f60e85b6c69"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -194,6 +212,28 @@ namespace UnityEngine.InputSystem
                     ""action"": ""Movement"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""71bd83fe-6c61-4dfc-a0c9-561a42683242"",
+                    ""path"": ""<Mouse>/delta/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera_Z"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4483f48f-d58e-4f19-a8cc-c0caf59726af"",
+                    ""path"": ""<Mouse>/delta/y"",
+                    ""interactions"": """",
+                    ""processors"": ""Invert"",
+                    ""groups"": """",
+                    ""action"": ""Camera_X"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -358,6 +398,8 @@ namespace UnityEngine.InputSystem
             m_PlayerFPV_Change_Camera = m_PlayerFPV.FindAction("Change_Camera", throwIfNotFound: true);
             m_PlayerFPV_Dash = m_PlayerFPV.FindAction("Dash", throwIfNotFound: true);
             m_PlayerFPV_Movement = m_PlayerFPV.FindAction("Movement", throwIfNotFound: true);
+            m_PlayerFPV_Camera_Z = m_PlayerFPV.FindAction("Camera_Z", throwIfNotFound: true);
+            m_PlayerFPV_Camera_X = m_PlayerFPV.FindAction("Camera_X", throwIfNotFound: true);
             // Player-side
             m_Playerside = asset.FindActionMap("Player-side", throwIfNotFound: true);
             m_Playerside_Shoot = m_Playerside.FindAction("Shoot", throwIfNotFound: true);
@@ -431,6 +473,8 @@ namespace UnityEngine.InputSystem
         private readonly InputAction m_PlayerFPV_Change_Camera;
         private readonly InputAction m_PlayerFPV_Dash;
         private readonly InputAction m_PlayerFPV_Movement;
+        private readonly InputAction m_PlayerFPV_Camera_Z;
+        private readonly InputAction m_PlayerFPV_Camera_X;
         public struct PlayerFPVActions
         {
             private @PlayerInputActions m_Wrapper;
@@ -441,6 +485,8 @@ namespace UnityEngine.InputSystem
             public InputAction @Change_Camera => m_Wrapper.m_PlayerFPV_Change_Camera;
             public InputAction @Dash => m_Wrapper.m_PlayerFPV_Dash;
             public InputAction @Movement => m_Wrapper.m_PlayerFPV_Movement;
+            public InputAction @Camera_Z => m_Wrapper.m_PlayerFPV_Camera_Z;
+            public InputAction @Camera_X => m_Wrapper.m_PlayerFPV_Camera_X;
             public InputActionMap Get() { return m_Wrapper.m_PlayerFPV; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -468,6 +514,12 @@ namespace UnityEngine.InputSystem
                     @Movement.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnMovement;
                     @Movement.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnMovement;
                     @Movement.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnMovement;
+                    @Camera_Z.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Z;
+                    @Camera_Z.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Z;
+                    @Camera_Z.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Z;
+                    @Camera_X.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_X;
+                    @Camera_X.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_X;
+                    @Camera_X.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_X;
                 }
                 m_Wrapper.m_PlayerFPVActionsCallbackInterface = instance;
                 if (instance != null)
@@ -490,6 +542,12 @@ namespace UnityEngine.InputSystem
                     @Movement.started += instance.OnMovement;
                     @Movement.performed += instance.OnMovement;
                     @Movement.canceled += instance.OnMovement;
+                    @Camera_Z.started += instance.OnCamera_Z;
+                    @Camera_Z.performed += instance.OnCamera_Z;
+                    @Camera_Z.canceled += instance.OnCamera_Z;
+                    @Camera_X.started += instance.OnCamera_X;
+                    @Camera_X.performed += instance.OnCamera_X;
+                    @Camera_X.canceled += instance.OnCamera_X;
                 }
             }
         }
@@ -575,6 +633,8 @@ namespace UnityEngine.InputSystem
             void OnChange_Camera(InputAction.CallbackContext context);
             void OnDash(InputAction.CallbackContext context);
             void OnMovement(InputAction.CallbackContext context);
+            void OnCamera_Z(InputAction.CallbackContext context);
+            void OnCamera_X(InputAction.CallbackContext context);
         }
         public interface IPlayersideActions
         {
