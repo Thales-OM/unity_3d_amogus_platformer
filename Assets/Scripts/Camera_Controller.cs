@@ -76,7 +76,7 @@ public class Camera_Controller : MonoBehaviour
         {
             //Debug.Log(enabled_camera.transform.localRotation.eulerAngles.x);
             //Debug.Log(enabled_camera.transform.localRotation.eulerAngles.x + degrees >= min_x_rot & enabled_camera.transform.localRotation.eulerAngles.x + degrees <= max_x_rot);
-            Debug.Log(enabled_camera.transform.localRotation.eulerAngles.x + degrees);
+            //Debug.Log(enabled_camera.transform.localRotation.eulerAngles.x + degrees);
             enabled_camera.transform.Rotate(degrees, 0.0f, 0.0f);
         }
     }

@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class Player : MonoBehaviour
 {
-    public float _moveSpeed, _jumpHeight, camera_sensitivity_x, camera_sensitivity_y;
+    public float _moveSpeed, _jumpHeight, camera_speed_x, camera_speed_y, camera_sensitivity_x, camera_sensitivity_y;
     public GameObject Main_Body, Hands;
     public Camera_Controller camera_controller;
     private Animator animator;
@@ -19,7 +20,9 @@ public class Player : MonoBehaviour
     private SkinnedMeshRenderer[] Main_Body_Meshes;
     private string current_camera_mode;
     private Dictionary<string, dynamic> mode_to_map;
-    private Vector2 mouse_input;
+    private Vector2 mouse_movement;
+    private bool camera_x_performed, camera_y_performed;
+    
 
     private void Start()
     {
@@ -49,10 +52,16 @@ public class Player : MonoBehaviour
         playerInputActions.Playerside.Change_Camera.performed += call_camera_switch; // может сделать .started
         playerInputActions.PlayerFPV.Change_Camera.performed += call_camera_switch;
 
-        playerInputActions.PlayerFPV.Camera_X.performed += ctx => mouse_input.x = ctx.ReadValue<float>();
-        playerInputActions.PlayerFPV.Camera_Z.performed += ctx => mouse_input.y = ctx.ReadValue<float>();
-        mode_to_map = new Dictionary<string, dynamic> {{ "Side", playerInputActions.Playerside }, { "FPV", playerInputActions.PlayerFPV }};// можно ввести абстракцию для обращения к мапу, но стоит ли??
+        camera_x_performed = false; 
+        camera_y_performed = false;
+        mouse_movement = new Vector2(0, 0);
 
+        playerInputActions.PlayerFPV.Camera_X.performed += ctx => mouse_movement.x = ctx.ReadValue<float>();
+        playerInputActions.PlayerFPV.Camera_X.performed += set => camera_x_performed = true;
+        playerInputActions.PlayerFPV.Camera_Y.performed += ctx => mouse_movement.y = ctx.ReadValue<float>();
+        playerInputActions.PlayerFPV.Camera_Y.performed += set => camera_y_performed = true;
+
+        mode_to_map = new Dictionary<string, dynamic> {{ "Side", playerInputActions.Playerside }, { "FPV", playerInputActions.PlayerFPV }};// можно ввести абстракцию для обращения к мапу, но стоит ли??
     }
     private void call_camera_switch(InputAction.CallbackContext context)
     {
@@ -122,6 +131,11 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void Dash()
+    {
+        
+    }
+
     private bool Walk(Vector2 inputVector)
     {
         inputVector.Normalize();
@@ -152,13 +166,56 @@ public class Player : MonoBehaviour
         isWalking = Walk(inputVector); // потом придется переделать если добавлю бег
     }
 
-    private void FPV_Camera_Input()
+    private Vector2 Camera_Sensitivity(Vector2 inputVector)
+    {   
+        Vector2 outputVector = new Vector2(0, 0);
+        if (Math.Abs(inputVector.x) >= camera_sensitivity_x)
+        {
+            outputVector.x = inputVector.x;
+        }
+
+        if (Math.Abs(inputVector.y) >= camera_sensitivity_y)
+        {
+            outputVector.y = inputVector.y;
+        }
+        return outputVector;
+    }
+    private void FPV_Camera_Input(Vector2 camera_input)
     {
         if (current_camera_mode == "FPV")
-        {
-            camera_controller.fpv_rotate_x(mouse_input.x * camera_sensitivity_x * Time.deltaTime);
-            fpv_rotate_y(mouse_input.y * camera_sensitivity_y * Time.deltaTime);
+        {   
+            Debug.Log(camera_input);
+            camera_controller.fpv_rotate_x(camera_input.x * camera_speed_x * Time.deltaTime);
+            fpv_rotate_y(camera_input.y * camera_speed_y * Time.deltaTime);
         }
+    }
+
+    /*private Vector2 Check_Camera_Movement(Vector2 camera_input) //может не передавать а менять
+    {
+        Vector2 outputVector = new Vector2(0, 0);
+        if (playerInputActions.PlayerFPV.Camera_X.WasPerformedThisFrame())
+        {
+            outputVector.x = camera_input.x;
+        }
+        if (playerInputActions.PlayerFPV.Camera_Y.WasPerformedThisFrame())
+        {
+            outputVector.y = camera_input.y;
+        }
+        return outputVector;
+    }*/
+
+    private Vector2 Check_Camera_Movement(bool camera_x_performed, bool camera_y_performed, Vector2 camera_input) //может не передавать а менять
+    {
+        Vector2 outputVector = new Vector2(0, 0);
+        if (camera_x_performed)
+        {
+            outputVector.x = camera_input.x;
+        }
+        if (camera_y_performed)
+        {
+            outputVector.y = camera_input.y;
+        }
+        return outputVector;
     }
 
     public void fpv_rotate_y(float degrees)
@@ -174,7 +231,7 @@ public class Player : MonoBehaviour
     {
         if (onGround)
         {
-            Debug.Log("Jump"+context.phase);
+            //Debug.Log("Jump"+context.phase);
             Main_Rigidbody.AddForce(Vector3.up * _jumpHeight, ForceMode.VelocityChange);
         }
     }
@@ -182,11 +239,23 @@ public class Player : MonoBehaviour
     {
         isWalking = false;
         Movement_Input(current_camera_mode);
-        FPV_Camera_Input();
+        FPV_Camera_Input(Camera_Sensitivity(Check_Camera_Movement(camera_x_performed, camera_y_performed, mouse_movement)));
+        //FPV_Camera_Input(Camera_Sensitivity(Mouse_Movement(ref mouse_last_position, mouse_current_position)));
         animator.SetBool("isWalking", isWalking); 
         animator.SetBool("onGround", onGround);
+
+        //контролирует что мышь была сдвинута и InputSystem не передает старый вектор
+        camera_x_performed = false;
+        camera_y_performed = false;
     }    
-     
+
+    /*private Vector2 Mouse_Movement(ref Vector2 mouse_last_position, Vector2 mouse_current_position)
+    {
+        Vector2 mouse_movement = mouse_current_position - mouse_last_position;
+        mouse_last_position = mouse_current_position;
+        return mouse_movement;
+    }
+    */
     private void OnCollisionEnter (Collision collision) // дискретно работает, может багануть
     {
         if (collision.gameObject.tag == "Floor")

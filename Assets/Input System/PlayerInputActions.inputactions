@@ -60,7 +60,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Camera_Z",
+                    "name": "Camera_Y",
                     "type": "Value",
                     "id": "3d7cf515-e13e-425c-b484-88278257961e",
                     "expectedControlType": "Axis",
@@ -196,7 +196,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Camera_Z",
+                    "action": "Camera_Y",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -956,6 +956,14 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_speed_x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
+      propertyPath: camera_speed_y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
       propertyPath: camera_controller
       value: 
       objectReference: {fileID: 239554266}
@@ -965,11 +973,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
       propertyPath: camera_sensitivity_x
-      value: 4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
       propertyPath: camera_sensitivity_y
-      value: 10
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1130379536510218234, guid: f920735d497332e4e8a73384030f0f5b, type: 3}
       propertyPath: camera_sensitivity_z

@@ -84,7 +84,7 @@ namespace UnityEngine.InputSystem
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Camera_Z"",
+                    ""name"": ""Camera_Y"",
                     ""type"": ""Value"",
                     ""id"": ""3d7cf515-e13e-425c-b484-88278257961e"",
                     ""expectedControlType"": ""Axis"",
@@ -220,7 +220,7 @@ namespace UnityEngine.InputSystem
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Camera_Z"",
+                    ""action"": ""Camera_Y"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -398,7 +398,7 @@ namespace UnityEngine.InputSystem
             m_PlayerFPV_Change_Camera = m_PlayerFPV.FindAction("Change_Camera", throwIfNotFound: true);
             m_PlayerFPV_Dash = m_PlayerFPV.FindAction("Dash", throwIfNotFound: true);
             m_PlayerFPV_Movement = m_PlayerFPV.FindAction("Movement", throwIfNotFound: true);
-            m_PlayerFPV_Camera_Z = m_PlayerFPV.FindAction("Camera_Z", throwIfNotFound: true);
+            m_PlayerFPV_Camera_Y = m_PlayerFPV.FindAction("Camera_Y", throwIfNotFound: true);
             m_PlayerFPV_Camera_X = m_PlayerFPV.FindAction("Camera_X", throwIfNotFound: true);
             // Player-side
             m_Playerside = asset.FindActionMap("Player-side", throwIfNotFound: true);
@@ -473,7 +473,7 @@ namespace UnityEngine.InputSystem
         private readonly InputAction m_PlayerFPV_Change_Camera;
         private readonly InputAction m_PlayerFPV_Dash;
         private readonly InputAction m_PlayerFPV_Movement;
-        private readonly InputAction m_PlayerFPV_Camera_Z;
+        private readonly InputAction m_PlayerFPV_Camera_Y;
         private readonly InputAction m_PlayerFPV_Camera_X;
         public struct PlayerFPVActions
         {
@@ -485,7 +485,7 @@ namespace UnityEngine.InputSystem
             public InputAction @Change_Camera => m_Wrapper.m_PlayerFPV_Change_Camera;
             public InputAction @Dash => m_Wrapper.m_PlayerFPV_Dash;
             public InputAction @Movement => m_Wrapper.m_PlayerFPV_Movement;
-            public InputAction @Camera_Z => m_Wrapper.m_PlayerFPV_Camera_Z;
+            public InputAction @Camera_Y => m_Wrapper.m_PlayerFPV_Camera_Y;
             public InputAction @Camera_X => m_Wrapper.m_PlayerFPV_Camera_X;
             public InputActionMap Get() { return m_Wrapper.m_PlayerFPV; }
             public void Enable() { Get().Enable(); }
@@ -514,9 +514,9 @@ namespace UnityEngine.InputSystem
                     @Movement.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnMovement;
                     @Movement.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnMovement;
                     @Movement.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnMovement;
-                    @Camera_Z.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Z;
-                    @Camera_Z.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Z;
-                    @Camera_Z.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Z;
+                    @Camera_Y.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Y;
+                    @Camera_Y.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Y;
+                    @Camera_Y.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_Y;
                     @Camera_X.started -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_X;
                     @Camera_X.performed -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_X;
                     @Camera_X.canceled -= m_Wrapper.m_PlayerFPVActionsCallbackInterface.OnCamera_X;
@@ -542,9 +542,9 @@ namespace UnityEngine.InputSystem
                     @Movement.started += instance.OnMovement;
                     @Movement.performed += instance.OnMovement;
                     @Movement.canceled += instance.OnMovement;
-                    @Camera_Z.started += instance.OnCamera_Z;
-                    @Camera_Z.performed += instance.OnCamera_Z;
-                    @Camera_Z.canceled += instance.OnCamera_Z;
+                    @Camera_Y.started += instance.OnCamera_Y;
+                    @Camera_Y.performed += instance.OnCamera_Y;
+                    @Camera_Y.canceled += instance.OnCamera_Y;
                     @Camera_X.started += instance.OnCamera_X;
                     @Camera_X.performed += instance.OnCamera_X;
                     @Camera_X.canceled += instance.OnCamera_X;
@@ -633,7 +633,7 @@ namespace UnityEngine.InputSystem
             void OnChange_Camera(InputAction.CallbackContext context);
             void OnDash(InputAction.CallbackContext context);
             void OnMovement(InputAction.CallbackContext context);
-            void OnCamera_Z(InputAction.CallbackContext context);
+            void OnCamera_Y(InputAction.CallbackContext context);
             void OnCamera_X(InputAction.CallbackContext context);
         }
         public interface IPlayersideActions
