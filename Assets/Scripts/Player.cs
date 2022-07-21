@@ -6,12 +6,12 @@ using System;
 
 public class Player : MonoBehaviour
 {
-    public float _moveSpeed, _jumpHeight, camera_speed_x, camera_speed_y, camera_sensitivity_x, camera_sensitivity_y;
+    public float _moveSpeed, airMoveRatio, jumpEnterRatio, _jumpHeight, camera_speed_x, camera_speed_y, camera_sensitivity_x, camera_sensitivity_y, _dashSpeed, dash_duration, dash_non_interruption;
     public GameObject Main_Body, Hands;
     public Camera_Controller camera_controller;
     private Animator animator;
     //private Camera cam_side, cam_fpv;
-    private bool onGround, isWalking;
+    private bool onGround, isWalking, isDashing, canDash;
     private int floor_counter;
     //private List <GameObject> currentCollisions = new List <GameObject> ();
     private Rigidbody Main_Rigidbody;
@@ -20,9 +20,17 @@ public class Player : MonoBehaviour
     private SkinnedMeshRenderer[] Main_Body_Meshes;
     private string current_camera_mode;
     private Dictionary<string, dynamic> mode_to_map;
-    private Vector2 mouse_movement;
+    private Vector2 mouse_movement, DirectionalInputVector2D;
+    private Vector3 DirectionalInputVector3D, DashRuntimeVector3D, JumpEnterVelocity, AirBaseVelocity;
     private bool camera_x_performed, camera_y_performed;
-    
+    private float current_dash_time;
+    private float iff(bool condition, float true_return, float false_return)
+    {
+        if(condition){
+            return true_return;
+        }
+        return false_return;
+    }
 
     private void Start()
     {
@@ -62,6 +70,19 @@ public class Player : MonoBehaviour
         playerInputActions.PlayerFPV.Camera_Y.performed += set => camera_y_performed = true;
 
         mode_to_map = new Dictionary<string, dynamic> {{ "Side", playerInputActions.Playerside }, { "FPV", playerInputActions.PlayerFPV }};// можно ввести абстракцию для обращения к мапу, но стоит ли??
+    
+        isDashing = false;
+        canDash = true;
+
+        DirectionalInputVector2D = new Vector2(0, 0);
+        DirectionalInputVector3D = new Vector3(0, 0, 0);
+        JumpEnterVelocity = new Vector3(0, 0, 0);
+        AirBaseVelocity = new Vector3(0, 0, 0);
+        
+        current_dash_time = 0f;
+
+        playerInputActions.Playerside.Dash.performed += startDash => Dash(DirectionalInputVector3D);
+        playerInputActions.PlayerFPV.Dash.performed += startDash => Dash(DirectionalInputVector3D);
     }
     private void call_camera_switch(InputAction.CallbackContext context)
     {
@@ -130,40 +151,85 @@ public class Player : MonoBehaviour
             playerInputActions.PlayerFPV.Enable();
         }
     }
-
-    private void Dash()
+    private Vector3 DirectionInputTo3D(Vector2 inputVector)
     {
-        
+        return new Vector3(inputVector.x, 0, inputVector.y);
+    }
+    private void Dash(Vector3 inputVector)
+    {
+        if(canDash)
+        {
+            current_dash_time = 0f;
+            if(inputVector.Equals(Vector3.zero))
+            {
+                DashRuntimeVector3D = transform.forward; //нет направления -> дэш вперед
+            }
+            else
+            {
+                DashRuntimeVector3D = Vector3.Normalize(transform.TransformVector(inputVector));
+            }
+            isDashing = true;
+            canDash = false;
+            AirBaseVelocity = AirBaseVelocity.magnitude * DashRuntimeVector3D;
+        } 
     }
 
-    private bool Walk(Vector2 inputVector)
+    private void Dash_Runtime()
+    {
+        if(isDashing)
+        {
+            Main_Rigidbody.velocity = DashRuntimeVector3D * _dashSpeed + Main_Rigidbody.velocity.y * transform.up;
+            current_dash_time += Time.deltaTime;
+            if(current_dash_time >= dash_non_interruption * dash_duration)
+            {
+                canDash = true;
+            }
+            if(current_dash_time >= dash_duration) //резкая остановка, потом добавлю замедление в конце
+            {
+                isDashing = false;
+            }
+        }
+    }
+    private void Jump_Inertia()
+    {
+        if(!onGround)
+        {
+            Main_Rigidbody.velocity += AirBaseVelocity;
+        }
+    }
+    private bool Walk(Vector3 inputVector)
     {
         inputVector.Normalize();
-        if (inputVector.x !=  0 | inputVector.y !=  0) // стоит ли использовать .Equals() ?
+        if (inputVector.x !=  0 | inputVector.z !=  0) // стоит ли использовать .Equals() ?
         {
             //Debug.Log(inputVector);
             //transform.position += Time.deltaTime * _moveSpeed * new Vector3(inputVector.y, 0, -inputVector.x); //движение будет привязано к частоте кадров
-            transform.Translate(Time.deltaTime * _moveSpeed * new Vector3(inputVector.x, 0, inputVector.y));
+            //transform.Translate(Time.deltaTime * _moveSpeed * inputVector);
+            Main_Rigidbody.velocity = iff(onGround, 1f, airMoveRatio) * _moveSpeed * transform.TransformVector(inputVector) + Main_Rigidbody.velocity.y * transform.up; // возможен глайд в воздухе
             return true;
         }
         else
         {
+            Main_Rigidbody.velocity = Vector3.zero + Main_Rigidbody.velocity.y * transform.up; // ради краткости можно velocity включить в строчку сверху и вынести из if 
             return false;
         }  
     }
     private void Movement_Input(string current_camera_mode)
     {
-        Vector2 inputVector = new Vector2(0, 0);
+        //Vector2 inputVector = new Vector2(0, 0);
         if (current_camera_mode == "Side")
         {
-            inputVector = playerInputActions.Playerside.Movement.ReadValue<Vector2>(); // возвращает нормализованный вектор
+            DirectionalInputVector2D = playerInputActions.Playerside.Movement.ReadValue<Vector2>(); // возвращает нормализованный вектор
         }
         else if (current_camera_mode == "FPV")
         {
-            inputVector = playerInputActions.PlayerFPV.Movement.ReadValue<Vector2>();
+            DirectionalInputVector2D = playerInputActions.PlayerFPV.Movement.ReadValue<Vector2>();
         }
 
-        isWalking = Walk(inputVector); // потом придется переделать если добавлю бег
+        DirectionalInputVector3D = DirectionInputTo3D(DirectionalInputVector2D);
+        isWalking = Walk(DirectionalInputVector3D); // потом придется переделать если добавлю бег
+        Jump_Inertia();
+        Dash_Runtime();
     }
 
     private Vector2 Camera_Sensitivity(Vector2 inputVector)
@@ -184,7 +250,7 @@ public class Player : MonoBehaviour
     {
         if (current_camera_mode == "FPV")
         {   
-            Debug.Log(camera_input);
+            //Debug.Log(camera_input);
             camera_controller.fpv_rotate_x(camera_input.x * camera_speed_x * Time.deltaTime);
             fpv_rotate_y(camera_input.y * camera_speed_y * Time.deltaTime);
         }
@@ -232,7 +298,9 @@ public class Player : MonoBehaviour
         if (onGround)
         {
             //Debug.Log("Jump"+context.phase);
-            Main_Rigidbody.AddForce(Vector3.up * _jumpHeight, ForceMode.VelocityChange);
+            Main_Rigidbody.AddForce(Vector3.up * _jumpHeight, ForceMode.VelocityChange); //ForceMode.Impulse);
+            JumpEnterVelocity = Main_Rigidbody.velocity;
+            AirBaseVelocity =  JumpEnterVelocity * jumpEnterRatio;
         }
     }
     private void Update()
@@ -262,7 +330,7 @@ public class Player : MonoBehaviour
         {
             floor_counter++;
         }
-        
+        //Debug.Log("Collision Enter");
         if (floor_counter == 0){
             onGround = false;
         }
@@ -277,11 +345,13 @@ public class Player : MonoBehaviour
         {
             floor_counter--;
         }
-
-        if (floor_counter == 0){
+        //Debug.Log("Collision Exit");
+        if (floor_counter == 0)
+        {
             onGround = false;
         }
-        else{
+        else
+        {
             onGround = true;
         }
     }
